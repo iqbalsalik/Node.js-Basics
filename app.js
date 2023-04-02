@@ -1,23 +1,40 @@
 const http = require("http");
+const fs = require("fs");
+
 const server = http.createServer((req,res)=>{
    const url = req.url;
+   const method = req.method;
    if(url === "/home"){
-    res.write("<html>")
-    res.write("<head><title>My First Page</title></head>");
-    res.write("<body><h1> Welcome home</h1></body>")
-    res.write("</html>")
-   }else if(url === "/about"){
-    res.write("<html>")
-    res.write("<head><title>My First Page</title></head>");
-    res.write("<body><h1> Welcome to About Us page</h1></body>")
-    res.write("</html>")
-   }else if(url === "/node"){
-    res.write("<html>")
-    res.write("<head><title>My First Page</title></head>");
-    res.write("<body><h1> Welcome to my Node Js project </h1></body>")
-    res.write("</html>")
+     
+      fs.readFile('./messege.txt', {encoding:'utf8'}, (err, data) => {
+         if (err) {
+           return;
+         }
+         res.write("<html>")
+         res.write(`<body><p>${data}</p><br><form action='/messege' method = 'POST'> <input type='text' name='messege'> <button type='submit'>submit</button></form></body>`)
+         res.write("</html>")
+         return res.end()
+       });
    }
-   process.exit();
+   
+   if(url === "/messege" && method === "POST"){
+      const body = [];
+      req.on("data",(chunks)=>{
+         body.push(chunks)
+      })
+      return req.on("end",()=>{
+         const bodyData = Buffer.concat(body).toString();
+         const messege = bodyData.split("=")[1]
+         fs.writeFile("messege.txt", messege,(err)=>{
+            if(err){
+               return 
+            }
+            res.statusCode = 302;
+            res.setHeader("Location","/home")
+            return res.end();
+         });
+      })
+   }
 })
 
-server.listen(4000)
+server.listen(3000)
