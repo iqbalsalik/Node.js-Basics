@@ -1,7 +1,11 @@
-const http = require("http");
-const handler = require("./routes.js")
-console.log(handler.text);
+const express = require("express")
 
-const server = http.createServer(handler.handler)
+const app = express();
+app.use((req,res,next)=>{
+    next()
+});
+app.use((req,res,next)=>{
+    res.send("<h1> Hello from Express JS!")
+})
 
-server.listen(3000);
+app.listen(3000)
